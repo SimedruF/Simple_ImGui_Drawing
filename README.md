@@ -1,9 +1,15 @@
-# Simple_RSA
+# Simple_ImGui_Drawing
 
-RSA (Rivest–Shamir–Adleman) is a public-key cryptosystem, one of the oldest widely used for secure data transmission. The initialism "RSA" comes from the surnames of Ron Rivest, Adi Shamir and Leonard Adleman, who publicly described the algorithm in 1977. An equivalent system was developed secretly in 1973 at Government Communications Headquarters (GCHQ), the British signals intelligence agency, by the English mathematician Clifford Cocks. That system was declassified in 1997.[2]
+The provided example demonstrates how to utilize the Dear ImGui library to draw a circle within an ImGui docking window. Dear ImGui is a popular GUI library that allows for easy integration of graphical user interfaces into applications. The example showcases the drawing capabilities of ImGui by creating a simple window and drawing a circle inside it.
 
-In a public-key cryptosystem, the encryption key is public and distinct from the decryption key, which is kept secret (private). An RSA user creates and publishes a public key based on two large prime numbers, along with an auxiliary value. The prime numbers are kept secret. Messages can be encrypted by anyone, via the public key, but can only be decoded by someone who knows the private key.[1]
+Key Components:
 
-The security of RSA relies on the practical difficulty of factoring the product of two large prime numbers, the "factoring problem". Breaking RSA encryption is known as the RSA problem. Whether it is as difficult as the factoring problem is an open question.[3] There are no published methods to defeat the system if a large enough key is used.
+    ImGui Integration: The example initializes Dear ImGui, sets up the necessary ImGui context, and initializes ImGui for rendering using GLFW and OpenGL.
 
-RSA is a relatively slow algorithm. Because of this, it is not commonly used to directly encrypt user data. More often, RSA is used to transmit shared keys for symmetric-key cryptography, which are then used for bulk encryption–decryption. 
+    Drawing a Circle: To draw a circle, the example defines a function draw_circle() that takes parameters such as the drawing list, center coordinates, radius, color, and number of segments to approximate the circle. This function utilizes ImGui's drawing API to add lines representing the circumference of the circle.
+
+    Drawing the UI: Inside the ImGui window, the circle is drawn by calling the draw_circle() function with appropriate parameters, such as center coordinates, radius, and color.
+
+    Rendering Loop: The example enters a rendering loop where ImGui frames are processed, ImGui UI is rendered, and GLFW buffers are swapped for display. The circle is continuously redrawn within the ImGui window as long as the application is running.
+
+Overall, the example demonstrates how ImGui can be used to create custom graphical elements, such as circles, within an ImGui-based user interface, providing developers with a convenient way to incorporate interactive visuals into their applications.
