@@ -9,3 +9,5 @@ Drawing the UI: Inside the ImGui window, the circle is drawn by calling the draw
 Rendering Loop: The example enters a rendering loop where ImGui frames are processed, ImGui UI is rendered, and GLFW buffers are swapped for display. The circle is continuously redrawn within the ImGui window as long as the application is running.
 
 Overall, the example demonstrates how ImGui can be used to create custom graphical elements, such as circles, within an ImGui-based user interface, providing developers with a convenient way to incorporate interactive visuals into their applications.
+
+![Alt text](images/Simple_CircleDraw.png)
