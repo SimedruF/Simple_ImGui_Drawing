@@ -11,3 +11,6 @@ Rendering Loop: The example enters a rendering loop where ImGui frames are proce
 Overall, the example demonstrates how ImGui can be used to create custom graphical elements, such as circles, within an ImGui-based user interface, providing developers with a convenient way to incorporate interactive visuals into their applications.
 
 ![Alt text](images/Simple_CircleDraw.png)
+
+Simple analog clock drawing
+![Alt text](images/Simple_analog_Clock.png)
