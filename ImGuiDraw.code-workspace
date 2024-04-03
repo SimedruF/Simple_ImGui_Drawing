@@ -69,7 +69,8 @@
 			"xutility": "cpp",
 			"list": "cpp",
 			"xhash": "cpp",
-			"xstring": "cpp"
+			"xstring": "cpp",
+			"xstddef": "cpp"
 		}
 	},
 	"launch": {

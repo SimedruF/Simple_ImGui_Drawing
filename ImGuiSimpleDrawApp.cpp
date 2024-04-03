@@ -43,7 +43,7 @@ namespace ImGuiSimpleDrawApp
         ImGui::Text("Local time: %s", time_str);
     }
 
-    void draw_circle(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_segments = 12)
+    void draw_circle(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_segments = 12, float thickness = 0.5f)
     {
         const float segment_angle = 2.0f * IM_PI / num_segments;
         for (int i = 0; i < num_segments; i++)
@@ -52,37 +52,32 @@ namespace ImGuiSimpleDrawApp
             float a1 = segment_angle * (i + 1);
             draw_list->AddLine(ImVec2(origin.x + cosf(a0) * radius, origin.y + sinf(a0) * radius),
                                ImVec2(origin.x + cosf(a1) * radius, origin.y + sinf(a1) * radius),
-                               color);
+                               color, thickness);
         }
     }
 
-    void draw_line_with_angle(ImDrawList *draw_list, ImVec2 origin, float length, float angle, ImU32 color)
+    void draw_line_with_angle(ImDrawList *draw_list, ImVec2 origin, float length, float angle, ImU32 color, float thickness = 0.5f)
     {
         ImVec2 end;
         end.x = origin.x + cosf(angle) * length;
         end.y = origin.y + sinf(angle) * length;
-        draw_list->AddLine(origin, end, color);
+        draw_list->AddLine(origin, end, color, thickness);
     }
-    void draw_circle_with_axes(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_segments = 12)
+    void draw_circle_with_axes(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_segments = 12, float thickness = 0.5f)
     {
         // Desenare cerc
-        draw_circle(draw_list, origin, radius, color, num_segments);
+        draw_circle(draw_list, origin, radius, color, num_segments,thickness);
 
         // Desenare axele cercului
         ImVec2 center = ImVec2(origin.x , origin.y );
         // Coordonatele centrului cercului
-       // ImVec2 center = ImVec2(origin.x + radius, origin.y + radius);
-
-        draw_list->AddLine(ImVec2(center.x - radius, center.y), ImVec2(center.x + radius, center.y), color); // Axă orizontală
-        draw_list->AddLine(ImVec2(center.x, center.y - radius), ImVec2(center.x, center.y + radius), color); // Axă verticală
-
-        /* draw_list->AddLine(ImVec2(center.x - radius, center.y), ImVec2(center.x + radius, center.y), color); // Axă orizontală
-        draw_list->AddLine(ImVec2(center.x, center.y - radius), ImVec2(center.x, center.y + radius), color); // Axă verticală */
+        draw_list->AddLine(ImVec2(center.x - radius, center.y), ImVec2(center.x + radius, center.y), color, 0.5f); // Axă orizontală
+        draw_list->AddLine(ImVec2(center.x, center.y - radius), ImVec2(center.x, center.y + radius), color, 0.5f); // Axă verticală
     }
-    void draw_circle_with_axes_and_labels(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_labels = 12)
+    void draw_circle_with_axes_and_labels(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_labels = 12, float thickness = 0.5f)
     {
         // Desenare cerc și axele cercului
-        draw_circle_with_axes(draw_list, origin, radius, color);
+        draw_circle_with_axes(draw_list, origin, radius, color, thickness);
 
         // Coordonatele centrului cercului
         ImVec2 center = ImVec2(origin.x + radius, origin.y + radius);
@@ -99,10 +94,10 @@ namespace ImGuiSimpleDrawApp
             draw_list->AddText(label_pos, ImGui::GetColorU32(ImGuiCol_Text), label); // Adaugă text la poziția calculată
         }
     }
-    void draw_circle_with_axes_and_separate_labels(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_labels = 12)
+    void draw_circle_with_axes_and_separate_labels(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_labels = 12, float thickness = 0.5f)
     {
         // Desenare cerc și axele cercului
-        draw_circle_with_axes(draw_list, origin, radius, color);
+        draw_circle_with_axes(draw_list, origin, radius, color, thickness);
 
         // Coordonatele centrului cercului
         ImVec2 center = ImVec2(origin.x, origin.y);
@@ -128,7 +123,7 @@ namespace ImGuiSimpleDrawApp
             ImVec2 diag_endpoint;
             diag_endpoint.x = center.x + cosf(angle) * radius;
             diag_endpoint.y = center.y + sinf(angle) * radius;
-            draw_list->AddLine(center, diag_endpoint, color); // Adaugă linie diagonală de la centru la punctul de pe cerc
+            draw_list->AddLine(center, diag_endpoint, color, 0.5f); // Adaugă linie diagonală de la centru la punctul de pe cerc
         }
     }
     int draw_circle_test()
@@ -137,16 +132,15 @@ namespace ImGuiSimpleDrawApp
         ImVec2 center = ImGui::GetCursorScreenPos();
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-        draw_circle_with_axes(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, IM_COL32(255, 0, 0, 255), initial_msg);
-        draw_circle_with_axes_and_separate_labels(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, IM_COL32(128, 128, 128, 255), initial_msg_labels);
+        draw_circle_with_axes(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, IM_COL32(255, 0, 0, 255), initial_msg, 6.0f);
+        draw_circle_with_axes_and_separate_labels(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, IM_COL32(128, 128, 128, 255), initial_msg_labels,0.5f);
 
         // Desenare linie cu unghi dat - minutar
-        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, (float)(current_minute-15) * IM_PI / 30.0, IM_COL32(0, 255, 0, 255));
+        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius-5, (float)(current_minute-15) * IM_PI / 30.0, IM_COL32(0, 255, 100, 255), 7.0f);
         // Desenare linie cu unghi dat - limba orei
-        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius-10, (float)(current_hour-15) * (2.0 * IM_PI / 12.0), IM_COL32(255, 0, 20, 255));
-
+        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius-20, (float)(current_hour-15) * (2.0 * IM_PI / 12.0), IM_COL32(0, 255, 100, 255), 7.0f);
         // Desenare linie cu unghi dat - secundar
-        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius+2, (float)(current_second-15) * (IM_PI / 30.0), IM_COL32(45, 10, 255, 255));
+        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius+2, (float)(current_second-15) * (IM_PI / 30.0), IM_COL32(45, 10, 255, 255),3.0f);
 
         draw_current_time();
        
