@@ -15,14 +15,20 @@ namespace ImGuiSimpleDrawApp
     int initial_msg = 50;
     int initial_msg_labels = 12;
     int initial_radius = 300;
-    int initial_angle = - 15;
-    int second_angle = -15;
+    int initial_angle = 0;
+    int second_angle = 360;
     bool redraw_circle = true;
     int current_hour = 0;
     int current_minute = 0;
     int current_second = 0;
+    ImVec4 selected_color = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); // Inițializează culoarea selectată la roșu
+    ImVec4 contur_color = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Inițializează culoarea selectată la roșu
+    ImVec4 clock_pointers_color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Inițializează culoarea selectată la roșu
 
-    void draw_current_time()
+    ImVec4 clock_axes_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // Inițializează culoarea selectată la gray
+
+    void
+    draw_current_time()
     {
         // Obține timpul curent
         std::time_t current_time = std::time(nullptr);
@@ -96,6 +102,13 @@ namespace ImGuiSimpleDrawApp
     }
     void draw_circle_with_axes_and_separate_labels(ImDrawList *draw_list, ImVec2 origin, float radius, ImU32 color, int num_labels = 12, float thickness = 0.5f)
     {
+
+        // Setează fontul cu o scară mai mare
+        ImGuiIO &io = ImGui::GetIO();
+        float old_font_scale = io.FontGlobalScale;
+        io.FontGlobalScale = 1.5f;
+
+
         // Desenare cerc și axele cercului
         draw_circle_with_axes(draw_list, origin, radius, color, thickness);
 
@@ -110,11 +123,12 @@ namespace ImGuiSimpleDrawApp
         {
             float angle = (angle_step * i) - (angle_step *2.0f); //+ (IM_PI / 2.0f); // Rotirea unghiului pentru a plasa cifra 12 în partea de sus
             ImVec2 label_pos;
-            label_pos.x = center.x + cosf(angle) * (radius - 10); // Amplasare etichetă la o distanță de raza cercului + 10
-            label_pos.y = center.y + sinf(angle) * (radius - 10);
+            label_pos.x = center.x + cosf(angle) * (radius - 20); // Amplasare etichetă la o distanță de raza cercului + 10
+            label_pos.y = center.y + sinf(angle) * (radius - 20);
             char label[3];                                                           // String pentru a stoca cifra și terminatorul nul
             sprintf(label, "%d", (12 + i + 1) % 12 == 0 ? 12 : (12 + i + 1) % 12);   // Convertește numărul la șir de caractere
-            draw_list->AddText(label_pos, ImGui::GetColorU32(ImGuiCol_Text), label); // Adaugă text la poziția calculată
+            //draw_list->AddText(label_pos, ImGui::GetColorU32(ImGuiCol_Text), label); // Adaugă text la poziția calculată
+            draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * io.FontGlobalScale, label_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
         }
         // Desenare axe diagonale
         for (int i = 0; i < num_labels; ++i)
@@ -126,27 +140,68 @@ namespace ImGuiSimpleDrawApp
             draw_list->AddLine(center, diag_endpoint, color, 0.5f); // Adaugă linie diagonală de la centru la punctul de pe cerc
         }
     }
+    void draw_filled_circle_segment(ImDrawList *draw_list, ImVec2 origin, ImVec2 center, float radius, float thickness, float start_angle, float end_angle, ImU32 color)
+    {
+        int num_segments = 30; // Numărul de segmente pentru a aproxima cercul
+        float angle_step = (end_angle - start_angle) / num_segments;
+
+        // Desenează conturul segmentului de cerc
+        for (int i = 0; i < num_segments; ++i)
+        {
+            float angle0 = start_angle + i * angle_step;
+            float angle1 = start_angle + (i + 1) * angle_step;
+            draw_list->AddLine(ImVec2(origin.x + cosf(angle0) * radius, origin.y + sinf(angle0) * radius),
+                               ImVec2(origin.x + cosf(angle1) * radius, origin.y + sinf(angle1) * radius),
+                               color, thickness);
+        }
+
+        // Desenează segmentul de cerc umplut
+        ImVec2 p_center(origin.x, origin.y);
+        for (int i = 0; i < num_segments; ++i)
+        {
+            float angle0 = start_angle + i * angle_step;
+            float angle1 = start_angle + (i + 1) * angle_step;
+            draw_list->AddTriangleFilled(p_center,
+                                         ImVec2(origin.x + cosf(angle0) * radius, origin.y + sinf(angle0) * radius),
+                                         ImVec2(origin.x + cosf(angle1) * radius, origin.y + sinf(angle1) * radius),
+                                         color);
+        }
+    }
+
     int draw_circle_test()
     {
         // Desenare cerc împărțit în 12 felii
         ImVec2 center = ImGui::GetCursorScreenPos();
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
+        float thickness = 2.5f;
+        float start_angle = (initial_angle * IM_PI) / 180.0f;
+        float end_angle = initial_angle + (second_angle * IM_PI) / 180.0f; // Exemplu: segment de la 0 la 90 de grade
+        ImU32 segment_color = IM_COL32(selected_color.x * 255, selected_color.y * 255, selected_color.z * 255, selected_color.w * 255);
+        // Desenează un segment de cerc umplut
+        draw_filled_circle_segment(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), center, initial_radius, thickness, start_angle, end_angle, segment_color);
+        ImU32 clock_contur_color = IM_COL32(contur_color.x * 255, contur_color.y * 255, contur_color.z * 255, contur_color.w * 255);
+        draw_circle_with_axes(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, clock_contur_color, initial_msg, 6.0f);
+        ImU32 clk_axes_color = IM_COL32(clock_axes_color.x * 255, clock_axes_color.y * 255, clock_axes_color.z * 255, clock_axes_color.w * 255);
+        draw_circle_with_axes_and_separate_labels(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, clk_axes_color, initial_msg_labels, 0.5f);
 
-        draw_circle_with_axes(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, IM_COL32(255, 0, 0, 255), initial_msg, 6.0f);
-        draw_circle_with_axes_and_separate_labels(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, IM_COL32(128, 128, 128, 255), initial_msg_labels,0.5f);
-
+        ImU32 clk_pointers_color = IM_COL32(clock_pointers_color.x * 255, clock_pointers_color.y * 255, clock_pointers_color.z * 255, clock_pointers_color.w * 255);
         // Desenare linie cu unghi dat - minutar
-        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius-5, (float)(current_minute-15) * IM_PI / 30.0, IM_COL32(0, 255, 100, 255), 7.0f);
+        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius - 5, (float)(current_minute - 15) * IM_PI / 30.0, clk_pointers_color, 7.0f);
         // Desenare linie cu unghi dat - limba orei
-        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius-20, (float)(current_hour-15) * (2.0 * IM_PI / 12.0), IM_COL32(0, 255, 100, 255), 7.0f);
+        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius - 20, (float)(current_hour - 15) * (2.0 * IM_PI / 12.0), clk_pointers_color, 7.0f);
         // Desenare linie cu unghi dat - secundar
-        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius+2, (float)(current_second-15) * (IM_PI / 30.0), IM_COL32(45, 10, 255, 255),3.0f);
+        draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius + 2, (float)(current_second - 15) * (IM_PI / 30.0), clk_pointers_color, 3.0f);
+        
+
+        // Afiseaza culoarea selectată
+        //ImGui::Text("Culoarea selectata: (%.2f, %.2f, %.2f, %.2f)", selected_color.x, selected_color.y, selected_color.z, selected_color.w);
 
         draw_current_time();
        
         return 0;
     }
 
+   
 
     void RenderUi(void)
     {
@@ -250,6 +305,65 @@ namespace ImGuiSimpleDrawApp
         ImGui::InputInt("Input radius", &initial_radius);
         ImGui::InputInt("Input angle", &initial_angle);
         ImGui::InputInt("Input second angle", &second_angle);
+        // Afișează color picker-ul și permite utilizatorului să selecteze o culoare
+        //ImGui::ColorPicker4("Selectează culoarea", (float *)&selected_color);
+        // Afișează un buton pentru deschiderea color picker-ului în modul popup
+        if (ImGui::Button("Open color picker background clock"))
+        {
+            ImGui::OpenPopup("MyColorPickerPopup1"); // Deschide popup-ul color picker-ului
+        }
+
+        // Verifică dacă popup-ul color picker-ului este deschis
+        if (ImGui::BeginPopup("MyColorPickerPopup1"))
+        {
+            // Afișează color picker-ul și permite utilizatorului să selecteze o culoare
+            ImGui::ColorPicker4("Select the color", (float *)&selected_color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueBar);
+
+            ImGui::EndPopup(); // Încheie popup-ul color picker-ului
+        }
+        // Afișează un buton pentru deschiderea color picker-ului în modul popup
+        if (ImGui::Button("Open color picker clock contour"))
+        {
+            ImGui::OpenPopup("MyColorPickerPopup2"); // Deschide popup-ul color picker-ului
+        }
+
+        // Verifică dacă popup-ul color picker-ului este deschis
+        if (ImGui::BeginPopup("MyColorPickerPopup2"))
+        {
+            // Afișează color picker-ul și permite utilizatorului să selecteze o culoare
+            ImGui::ColorPicker4("Select the color", (float *)&contur_color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueBar);
+
+            ImGui::EndPopup(); // Încheie popup-ul color picker-ului
+        }
+        // Afișează un buton pentru deschiderea color picker-ului în modul popup
+        if (ImGui::Button("Open color picker clock pointers"))
+        {
+            ImGui::OpenPopup("MyColorPickerPopup3"); // Deschide popup-ul color picker-ului
+        }
+
+        // Verifică dacă popup-ul color picker-ului este deschis
+        if (ImGui::BeginPopup("MyColorPickerPopup3"))
+        {
+            // Afișează color picker-ul și permite utilizatorului să selecteze o culoare
+            ImGui::ColorPicker4("Select the color", (float *)&clock_pointers_color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueBar);
+
+            ImGui::EndPopup(); // Încheie popup-ul color picker-ului
+        }
+
+        // Afișează un buton pentru deschiderea color picker-ului în modul popup
+        if (ImGui::Button("Open color picker axes"))
+        {
+            ImGui::OpenPopup("MyColorPickerPopup4"); // Deschide popup-ul color picker-ului
+        }
+
+        // Verifică dacă popup-ul color picker-ului este deschis
+        if (ImGui::BeginPopup("MyColorPickerPopup4"))
+        {
+            // Afișează color picker-ul și permite utilizatorului să selecteze o culoare
+            ImGui::ColorPicker4("Select the color", (float *)&clock_axes_color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueBar);
+
+            ImGui::EndPopup(); // Încheie popup-ul color picker-ului
+        }
 
         ImGui::End(); // Settings
 
