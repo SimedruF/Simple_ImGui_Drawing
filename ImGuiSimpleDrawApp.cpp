@@ -22,6 +22,7 @@ namespace ImGuiSimpleDrawApp
     int current_minute = 0;
     int current_second = 0;
     int clock_numbers_pos = 6;
+    int clock_numbers_radius = 260;
     ImVec4 selected_color = ImVec4(0.05f, 0.10f, 0.17f, 1.0f); // Inițializează culoarea selectată la roșu
     ImVec4 contur_color = ImVec4(0.17f, 0.19f, 0.52f, 1.0f); // Inițializează culoarea selectată la roșu
     ImVec4 clock_pointers_color = ImVec4(0.67f, 0.67f, 0.82f, 1.00f); // Inițializează culoarea selectată la roșu
@@ -95,8 +96,8 @@ namespace ImGuiSimpleDrawApp
         {
             float angle = 2.0f * IM_PI * i / num_labels;
             ImVec2 label_pos;
-            label_pos.x = center.x + (cosf(angle) * radius) + 10; // Amplasare etichetă la o distanță de raza cercului + 10
-            label_pos.y = center.y + (sinf(angle) * radius) + 10;
+            label_pos.x = center.x + (cosf(angle) * clock_numbers_radius) + 10; // Amplasare etichetă la o distanță de raza cercului + 10
+            label_pos.y = center.y + (sinf(angle) * clock_numbers_radius) + 10;
             char label[3];                                                           // String pentru a stoca cifra și terminatorul nul
             sprintf(label, "%d", i + 1);                                             // Convertește numărul la șir de caractere
             draw_list->AddText(label_pos, ImGui::GetColorU32(ImGuiCol_Text), label); // Adaugă text la poziția calculată
@@ -125,12 +126,12 @@ namespace ImGuiSimpleDrawApp
         {
             float angle = (angle_step * i) - (angle_step *2.0f); //+ (IM_PI / 2.0f); // Rotirea unghiului pentru a plasa cifra 12 în partea de sus
             ImVec2 label_pos;
-            label_pos.x = center.x + (cosf(angle) * radius) - clock_numbers_pos; // Amplasare etichetă la o distanță de raza cercului + 10
-            label_pos.y = center.y + (sinf(angle) * radius) - clock_numbers_pos;
+            label_pos.x = center.x + (cosf(angle) * clock_numbers_radius) - clock_numbers_pos; // Amplasare etichetă la o distanță de raza cercului
+            label_pos.y = center.y + (sinf(angle) * clock_numbers_radius) - clock_numbers_pos;
             char label[3];                                                           // String pentru a stoca cifra și terminatorul nul
             sprintf(label, "%d", (12 + i + 1) % 12 == 0 ? 12 : (12 + i + 1) % 12);   // Convertește numărul la șir de caractere
             //draw_list->AddText(label_pos, ImGui::GetColorU32(ImGuiCol_Text), label); // Adaugă text la poziția calculată
-            draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * io.FontGlobalScale, label_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+            draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * font_size, label_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
         }
         // Desenare axe diagonale
         for (int i = 0; i < num_labels; ++i)
@@ -142,7 +143,7 @@ namespace ImGuiSimpleDrawApp
             draw_list->AddLine(center, diag_endpoint, color, 0.5f); // Adaugă linie diagonală de la centru la punctul de pe cerc
         }
     }
-    void draw_filled_circle_segment(ImDrawList *draw_list, ImVec2 origin, ImVec2 center, float radius, float thickness, float start_angle, float end_angle, ImU32 color)
+    void draw_filled_circle_segment(ImDrawList *draw_list, ImVec2 origin, ImVec2 center, float radius, float thickness, float start_angle, float end_angle, ImU32 color, ImVec4 imvec4_color)
     {
         int num_segments = 30; // Numărul de segmente pentru a aproxima cercul
         float angle_step = (end_angle - start_angle) / num_segments;
@@ -152,9 +153,12 @@ namespace ImGuiSimpleDrawApp
         {
             float angle0 = start_angle + i * angle_step;
             float angle1 = start_angle + (i + 1) * angle_step;
+            // Calculează culorea cu transparență în funcție de unghi
+            ImVec4 segment_color = ImVec4(imvec4_color.x, imvec4_color.y, imvec4_color.z, (sinf(angle0) + 1.0f) / 2.0f); // Folosește sinusul unghiului pentru a ajusta transparența
+
             draw_list->AddLine(ImVec2(origin.x + cosf(angle0) * radius, origin.y + sinf(angle0) * radius),
                                ImVec2(origin.x + cosf(angle1) * radius, origin.y + sinf(angle1) * radius),
-                               color, thickness);
+                               IM_COL32((int)(segment_color.x * 255), (int)(segment_color.y * 255), (int)(segment_color.z * 255), (int)(segment_color.w * 255)), thickness);
         }
 
         // Desenează segmentul de cerc umplut
@@ -163,10 +167,13 @@ namespace ImGuiSimpleDrawApp
         {
             float angle0 = start_angle + i * angle_step;
             float angle1 = start_angle + (i + 1) * angle_step;
+            // Calculează culorea cu transparență în funcție de unghi
+            ImVec4 segment_color = ImVec4(imvec4_color.x, imvec4_color.y, imvec4_color.z, (sinf(angle0) + 1.0f) / 2.0f); // Folosește sinusul unghiului pentru a ajusta transparența
+
             draw_list->AddTriangleFilled(p_center,
                                          ImVec2(origin.x + cosf(angle0) * radius, origin.y + sinf(angle0) * radius),
                                          ImVec2(origin.x + cosf(angle1) * radius, origin.y + sinf(angle1) * radius),
-                                         color);
+                                         IM_COL32((int)(segment_color.x * 255), (int)(segment_color.y * 255), (int)(segment_color.z * 255), (int)(segment_color.w * 255)));
         }
     }
 
@@ -181,8 +188,7 @@ namespace ImGuiSimpleDrawApp
         float end_angle = initial_angle + (second_angle * IM_PI) / 180.0f; // Exemplu: segment de la 0 la 90 de grade
         ImU32 segment_color = IM_COL32(selected_color.x * 255, selected_color.y * 255, selected_color.z * 255, selected_color.w * 255);
         // Desenează un segment de cerc umplut
-        draw_filled_circle_segment(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), center, initial_radius, thickness, start_angle, end_angle, segment_color);
-
+        draw_filled_circle_segment(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), center, initial_radius, thickness, start_angle, end_angle, segment_color, selected_color);
 
         ImU32 clock_contur_color = IM_COL32(contur_color.x * 255, contur_color.y * 255, contur_color.z * 255, contur_color.w * 255);
         draw_circle_with_axes(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius, clock_contur_color, initial_msg, 6.0f);
@@ -314,6 +320,8 @@ namespace ImGuiSimpleDrawApp
         ImGui::InputInt("Input angle", &initial_angle);
         ImGui::InputInt("Input second angle", &second_angle);
         ImGui::InputInt("Numbers position", &clock_numbers_pos);
+        ImGui::InputInt("Numbers radius", &clock_numbers_radius);
+
         ImGui::InputFloat3("Font size", &font_size);
         // Afișează un checkbox pentru a controla afișarea textului
         ImGui::Checkbox("Show debugg text", &show_text);
