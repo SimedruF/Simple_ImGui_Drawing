@@ -155,7 +155,7 @@ public:
         // Desenare cifre în jurul cercului
         for (int i = 0; i < num_labels; ++i)
         {
-            float angle = (angle_step * i) - (angle_step * 2.0f); //+ (IM_PI / 2.0f); // Rotirea unghiului pentru a plasa cifra 12 în partea de sus
+            float angle = (angle_step * i) - (angle_step * 2.0f);  // Rotirea unghiului pentru a plasa cifra 12 în partea de sus
             ImVec2 label_pos;
             label_pos.x = center.x + (cosf(angle) * numbers_radius) - numbers_pos; // Amplasare etichetă la o distanță de raza cercului
             label_pos.y = center.y + (sinf(angle) * numbers_radius) - numbers_pos;
@@ -194,13 +194,12 @@ public:
         // Desenare cifre în jurul cercului
         for (int i = 0; i < num_labels; ++i)
         {
-            float angle = (angle_step * i) - (angle_step * 2.0f); //+ (IM_PI / 2.0f); // Rotirea unghiului pentru a plasa cifra 12 în partea de sus
+            float angle = (angle_step * i) - (angle_step * 2.0f);  // Rotirea unghiului pentru a plasa cifra 12 în partea de sus
             ImVec2 label_pos;
             label_pos.x = center.x + (cosf(angle) * numbers_radius) - numbers_pos; // Amplasare etichetă la o distanță de raza cercului
             label_pos.y = center.y + (sinf(angle) * numbers_radius) - numbers_pos;
             char label[3];                                                         // String pentru a stoca cifra și terminatorul nul
             sprintf(label, "%d",i+1); // Convertește numărul la șir de caractere
-            // draw_list->AddText(label_pos, ImGui::GetColorU32(ImGuiCol_Text), label); // Adaugă text la poziția calculată
             draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize() * font_size, label_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
         }
         // Desenare axe diagonale
@@ -224,8 +223,6 @@ public:
             float angle0 = start_angle + i * angle_step;
             float angle1 = start_angle + (i + 1) * angle_step;
             // Calculează culorea cu transparență în funcție de unghi
-            //ImVec4 segment_color = ImVec4(imvec4_color.x, imvec4_color.y, imvec4_color.z, (sinf(angle0) + 1.0f) / 2.0f); // Folosește sinusul unghiului pentru a ajusta transparența
-
             draw_list->AddLine(ImVec2(origin.x + cosf(angle0) * radius, origin.y + sinf(angle0) * radius),
                                ImVec2(origin.x + cosf(angle1) * radius, origin.y + sinf(angle1) * radius),
                                color, thickness);
@@ -237,9 +234,7 @@ public:
         {
             float angle0 = start_angle + i * angle_step;
             float angle1 = start_angle + (i + 1) * angle_step;
-            // Calculează culorea cu transparență în funcție de unghi
-           // ImVec4 segment_color = ImVec4(imvec4_color.x, imvec4_color.y, imvec4_color.z, (sinf(angle0) + 1.0f) / 2.0f); // Folosește sinusul unghiului pentru a ajusta transparența
-
+       
             draw_list->AddTriangleFilled(p_center,
                                          ImVec2(origin.x + cosf(angle0) * radius, origin.y + sinf(angle0) * radius),
                                          ImVec2(origin.x + cosf(angle1) * radius, origin.y + sinf(angle1) * radius),
@@ -270,7 +265,6 @@ public:
                 ImVec2 slice_right(center.x + cosf(angle1) * (radius * 0.1f), center.y + sinf(angle1) * (radius * 0.1f));
 
                 // Desenează triunghiul umplut cu punctele în ordine corectă
-               // draw_list->AddTriangleFilled(slice_left, slice_right, slice_center, color);
                 draw_filled_circle_segment(draw_list, center, radius, thickness, angle0, angle1, color);
             }
             else
