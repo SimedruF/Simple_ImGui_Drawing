@@ -252,20 +252,23 @@ namespace ImGuiSimpleDrawApp
         myCircle.setOrigin({center.x + 400, center.y });
         myCircle.setStartAngle(start_angle);
         myCircle.setIndex(filled_segment_counter);
+        myCircle.setBladeIndex(filled_segment_counter);
+        myCircle.setCurrentVibration(1.45);
+        myCircle.setRotSpeed(30.6);
         // Display circle information
         //myCircle.displayInfo();
 
         // draw clock
-        myCircle.draw_clock(draw_list, 
-                            ImVec2(center.x + 450, center.y), 
-                            initial_angle, 
-                            second_angle, 
-                            initial_msg, 
-                            initial_msg_labels, 
-                            selected_color, 
-                            contur_color, 
-                            clock_pointers_color, 
-                            clock_axes_color);
+        // myCircle.draw_clock(draw_list, 
+        //                     ImVec2(center.x + 450, center.y), 
+        //                     initial_angle, 
+        //                     second_angle, 
+        //                     initial_msg, 
+        //                     initial_msg_labels, 
+        //                     selected_color, 
+        //                     contur_color, 
+        //                     clock_pointers_color, 
+        //                     clock_axes_color);
         // draw turbine
         myCircle.draw_turbine(draw_list,
                               ImVec2(center.x, center.y+450),

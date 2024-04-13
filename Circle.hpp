@@ -19,6 +19,9 @@ private:
     int current_second;
     bool show_text;
     int index;
+    float rotation_speed;
+    int blade_index;
+    float current_vibration;
 
 public:
     // Constructor
@@ -39,6 +42,10 @@ public:
     int getCurrentSec() { return current_second; }
     int getShowText() { return show_text; }
 
+    float getRotSpeed() { return rotation_speed; }
+    int getBladeIndex() { return blade_index; }
+    int getCurrentVibration() { return current_vibration; }
+
     // Setters
     void setRadius(float r) { radius = r; }
     void setThickness(float t) { thickness = t; }
@@ -51,6 +58,9 @@ public:
     void setCurrentSec(int cs) { current_second = cs; }
     void setShowText(bool st) { show_text = st; }
     void setIndex(int indx) { index = indx; }
+    void setRotSpeed(int rs) { rotation_speed=rs; }
+    void setBladeIndex(int bi) { blade_index=bi; }
+    void setCurrentVibration(float cv) { current_vibration = cv; }
 
     // Method to display circle information
     void displayInfo() const
@@ -367,6 +377,25 @@ public:
             ImGui::Text("Culoarea selectata: (%.2f, %.2f, %.2f, %.2f)", clock_pointers_color.x, clock_pointers_color.y, clock_pointers_color.z, clock_pointers_color.w);
         }
         draw_current_time();
+        // Show values 
+        ImVec2 cursor_pos = ImVec2(ImGui::GetWindowPos().x + 400 , ImGui::GetWindowPos().y + 500);
+        //ImGui::SetCursorPos(cursor_pos);
+       // ImGui::Text("Rotation Speed: %.2f", rotation_speed);
+        char label[120];
+        sprintf(label, "Rotation Speed: %.2f", rotation_speed); // Convertește numărul la șir de caractere
+        draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize(), cursor_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+
+        cursor_pos.y += 20;
+        //ImGui::SetCursorPos(cursor_pos);
+        //ImGui::Text("Blade Index: %d", blade_index);
+        sprintf(label, "Blade Index: %d", blade_index); // Convertește numărul la șir de caractere
+        draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize(), cursor_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+        cursor_pos.y += 20;
+        //ImGui::SetCursorPos(cursor_pos);
+        //ImGui::Text("Current Vibration: %.2f", current_vibration);
+        sprintf(label, "Current Vibration: %.2f", current_vibration); // Convertește numărul la șir de caractere
+        draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize(), cursor_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+
         return 0;
     }
 };
