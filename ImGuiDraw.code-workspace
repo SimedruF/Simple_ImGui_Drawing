@@ -70,7 +70,14 @@
 			"list": "cpp",
 			"xhash": "cpp",
 			"xstring": "cpp",
-			"xstddef": "cpp"
+			"xstddef": "cpp",
+			"ios": "cpp",
+			"xfacet": "cpp",
+			"xiosbase": "cpp",
+			"xlocale": "cpp",
+			"xlocinfo": "cpp",
+			"xlocnum": "cpp",
+			"xmemory": "cpp"
 		}
 	},
 	"launch": {

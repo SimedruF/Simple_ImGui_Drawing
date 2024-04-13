@@ -5,6 +5,7 @@
 #include <math.h>
 #include <cmath>
 #include <ctime>
+#include "Circle.hpp"
 #ifndef IM_PI
 #define IM_PI 3.14159265358979323846f
 #endif
@@ -14,7 +15,7 @@ namespace ImGuiSimpleDrawApp
     unsigned char buffer_serial[1024];
     int initial_msg = 50;
     int initial_msg_labels = 12;
-    int initial_radius = 300;
+    int initial_radius = 200;
     int initial_angle = 0;
     int second_angle = 360;
     bool redraw_circle = true;
@@ -22,13 +23,16 @@ namespace ImGuiSimpleDrawApp
     int current_minute = 0;
     int current_second = 0;
     int clock_numbers_pos = 6;
-    int clock_numbers_radius = 260;
+    int clock_numbers_radius = 150;
+    int filled_segment_counter=0;
     ImVec4 selected_color = ImVec4(0.05f, 0.10f, 0.17f, 1.0f); // Inițializează culoarea selectată la roșu
     ImVec4 contur_color = ImVec4(0.17f, 0.19f, 0.52f, 1.0f); // Inițializează culoarea selectată la roșu
     ImVec4 clock_pointers_color = ImVec4(0.67f, 0.67f, 0.82f, 1.00f); // Inițializează culoarea selectată la roșu
     ImVec4 clock_axes_color = ImVec4(0.99f, 0.91f, 0.91f, 0.04f);      // Inițializează culoarea selectată la gray
     bool show_text = false;
     float font_size = 1.0f;
+    // Create an instance of Circle
+    Circle myCircle(10.0f, 2.0f, {0.0f, 0.0f}, 0.0f, 12, 12);
     void draw_current_time()
     {
         // Obține timpul curent
@@ -176,11 +180,30 @@ namespace ImGuiSimpleDrawApp
                                          IM_COL32((int)(segment_color.x * 255), (int)(segment_color.y * 255), (int)(segment_color.z * 255), (int)(segment_color.w * 255)));
         }
     }
+    void draw_colored_segment(ImDrawList *draw_list, ImVec2 center, float radius, float thickness, float start_angle, float end_angle, ImU32 color, int num_segments)
+    {
+        float angle_step = (end_angle - start_angle) / num_segments;
 
+        // Desenează segmentul de cerc principal
+        draw_list->PathArcTo(center, radius, start_angle, end_angle, num_segments);
+        draw_list->PathStroke(color, false, thickness);
+
+        // Desenează unele linii din segment cu o altă culoare
+        for (int i = num_segments; i < num_segments * 3 / 4; ++i)
+        {
+            float angle0 = start_angle + i * angle_step;
+            float angle1 = start_angle + (i + 1) * angle_step;
+            ImVec2 p0(center.x + cosf(angle0) * radius, center.y + sinf(angle0) * radius);
+            ImVec2 p1(center.x + cosf(angle1) * radius, center.y + sinf(angle1) * radius);
+            draw_list->AddLine(p0, p1, IM_COL32(255, 0, 0, 255), thickness);
+        }
+    }
     int draw_circle_test()
     {
         // Desenare cerc împărțit în 12 felii
-        ImVec2 center = ImGui::GetCursorScreenPos();
+        ImVec2 center = ImGui::GetCursorScreenPos() ;
+        center.x += 20;
+        center.y += 20;
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         
         float thickness = 2.5f;
@@ -203,6 +226,14 @@ namespace ImGuiSimpleDrawApp
         // Desenare linie cu unghi dat - secundar
         draw_line_with_angle(draw_list, ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius + 2, (float)(current_second - 15) * (IM_PI / 30.0), clk_pointers_color, 3.0f);
 
+        // Desenează un segment de cerc colorat
+       // ImVec2 center(200, 200);
+       // float radius = 100.0f;
+        //float thickness = 2.0f;
+        //float start_angle = 0.0f;
+        //float end_angle = IM_PI * 2.0f; // Cercul complet
+        draw_colored_segment(ImGui::GetWindowDrawList(), ImVec2(center.x + initial_radius, center.y + initial_radius), initial_radius + 10, thickness, start_angle, end_angle, IM_COL32(0, 255, 0, 255), initial_msg);
+
         if (show_text)
         {
             // Afiseaza culoarea selectată
@@ -212,6 +243,40 @@ namespace ImGuiSimpleDrawApp
             ImGui::Text("Culoarea selectata: (%.2f, %.2f, %.2f, %.2f)", clock_pointers_color.x, clock_pointers_color.y, clock_pointers_color.z, clock_pointers_color.w);
         }
         draw_current_time();
+
+        myCircle.setNumbersPos(clock_numbers_pos);
+        myCircle.setNumbersRadius(clock_numbers_radius);
+        // Update circle properties
+        myCircle.setRadius(initial_radius);
+        myCircle.setThickness(thickness);
+        myCircle.setOrigin({center.x + 400, center.y });
+        myCircle.setStartAngle(start_angle);
+        myCircle.setIndex(filled_segment_counter);
+        // Display circle information
+        //myCircle.displayInfo();
+
+        // draw clock
+        myCircle.draw_clock(draw_list, 
+                            ImVec2(center.x + 450, center.y), 
+                            initial_angle, 
+                            second_angle, 
+                            initial_msg, 
+                            initial_msg_labels, 
+                            selected_color, 
+                            contur_color, 
+                            clock_pointers_color, 
+                            clock_axes_color);
+        // draw turbine
+        myCircle.draw_turbine(draw_list,
+                              ImVec2(center.x, center.y+450),
+                              initial_angle,
+                              second_angle,
+                              initial_msg,
+                              initial_msg_labels,
+                              selected_color,
+                              contur_color,
+                              clock_pointers_color,
+                              clock_axes_color);
         return 0;
     }
 
@@ -321,7 +386,11 @@ namespace ImGuiSimpleDrawApp
         ImGui::InputInt("Input second angle", &second_angle);
         ImGui::InputInt("Numbers position", &clock_numbers_pos);
         ImGui::InputInt("Numbers radius", &clock_numbers_radius);
-
+        ImGui::InputInt("Filled segment", &filled_segment_counter);
+        if (filled_segment_counter>initial_msg)
+        {
+            filled_segment_counter = 0;
+        }
         ImGui::InputFloat3("Font size", &font_size);
         // Afișează un checkbox pentru a controla afișarea textului
         ImGui::Checkbox("Show debugg text", &show_text);
