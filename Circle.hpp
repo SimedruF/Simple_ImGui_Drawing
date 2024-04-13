@@ -72,6 +72,10 @@ public:
         std::cout << "Start Angle: " << start_angle << std::endl;
         std::cout << "Numbers Radius: " << numbers_radius << std::endl;
         std::cout << "Numbers Position: " << numbers_pos << std::endl;
+        std::cout << "Blade index: " << blade_index<< std::endl;
+        std::cout << "Rotation speed: " << rotation_speed << std::endl;
+        std::cout << "Current vibration: " << current_vibration << std::endl;
+
     }
     void draw_current_time()
     {
@@ -257,8 +261,8 @@ public:
 
         for (int i = 0; i < segments; ++i)
         {
-            float angle0 = i * angle_step;
-            float angle1 = (i + 1) * angle_step;
+            float angle0 = i * angle_step - (angle_step * 2.0f);
+            float angle1 = (i + 1) * angle_step - (angle_step * 2.0f);
 
             ImVec2 p0(center.x + cosf(angle0) * radius, center.y + sinf(angle0) * radius);
             ImVec2 p1(center.x + cosf(angle1) * radius, center.y + sinf(angle1) * radius);
@@ -352,20 +356,13 @@ public:
             index = 0;
         // Desenează un segment de cerc umplut
         ImU32 extra_contour_color = IM_COL32(selected_color.x * 255, selected_color.y * 255, selected_color.z * 255, selected_color.w * 255);
-        draw_colored_circle_segment(draw_list, ImVec2(center.x + radius, center.y + radius), radius, thickness, segments, index++, extra_contour_color);
+        draw_colored_circle_segment(draw_list, ImVec2(center.x + radius, center.y + radius), radius, thickness, segments, index, extra_contour_color);
 
         ImU32 clock_contur_color = IM_COL32(contur_color.x * 255, contur_color.y * 255, contur_color.z * 255, contur_color.w * 255);
         draw_circle_with_axes(draw_list, ImVec2(center.x + radius, center.y + radius), radius, clock_contur_color, segments, 6.0f);
         ImU32 clk_axes_color = IM_COL32(clock_axes_color.x * 255, clock_axes_color.y * 255, clock_axes_color.z * 255, clock_axes_color.w * 255);
         draw_circle_with_axes_and_labels_with_font(draw_list, ImVec2(center.x + radius, center.y + radius), radius, clk_axes_color, segments, 0.5f);
-
         ImU32 clk_pointers_color = IM_COL32(clock_pointers_color.x * 255, clock_pointers_color.y * 255, clock_pointers_color.z * 255, clock_pointers_color.w * 255);
-        // Desenare linie cu unghi dat - minutar
-        //draw_line_with_angle(draw_list, ImVec2(center.x + radius, center.y + radius), radius - 5, (float)(current_minute - 15) * IM_PI / 30.0, clk_pointers_color, 7.0f);
-        // Desenare linie cu unghi dat - limba orei
-        //draw_line_with_angle(draw_list, ImVec2(center.x + radius, center.y + radius), radius - 20, (float)(current_hour - 15) * (2.0 * IM_PI / 12.0), clk_pointers_color, 7.0f);
-        // Desenare linie cu unghi dat - secundar
-        //draw_line_with_angle(draw_list, ImVec2(center.x + radius, center.y + radius), radius + 2, (float)(current_second - 15) * (IM_PI / 30.0), clk_pointers_color, 3.0f);
 
 
         if (show_text)
@@ -378,21 +375,15 @@ public:
         }
         draw_current_time();
         // Show values 
-        ImVec2 cursor_pos = ImVec2(ImGui::GetWindowPos().x + 400 , ImGui::GetWindowPos().y + 500);
-        //ImGui::SetCursorPos(cursor_pos);
-       // ImGui::Text("Rotation Speed: %.2f", rotation_speed);
+        ImVec2 cursor_pos = ImVec2(ImGui::GetWindowPos().x + 420 , ImGui::GetWindowPos().y + 520);
         char label[120];
         sprintf(label, "Rotation Speed: %.2f", rotation_speed); // Convertește numărul la șir de caractere
         draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize(), cursor_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
 
-        cursor_pos.y += 20;
-        //ImGui::SetCursorPos(cursor_pos);
-        //ImGui::Text("Blade Index: %d", blade_index);
-        sprintf(label, "Blade Index: %d", blade_index); // Convertește numărul la șir de caractere
+        cursor_pos.y += 30;
+        sprintf(label, "Blade Index: %d", blade_index+1); // Convertește numărul la șir de caractere
         draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize(), cursor_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
-        cursor_pos.y += 20;
-        //ImGui::SetCursorPos(cursor_pos);
-        //ImGui::Text("Current Vibration: %.2f", current_vibration);
+        cursor_pos.y += 30;
         sprintf(label, "Current Vibration: %.2f", current_vibration); // Convertește numărul la șir de caractere
         draw_list->AddText(ImGui::GetFont(), ImGui::GetFontSize(), cursor_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
 
